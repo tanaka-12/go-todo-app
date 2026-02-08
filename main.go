@@ -27,7 +27,7 @@ func main() {
 
 	//３．無限ループ開始
 	for{
-		fmt.Print("タスクを入力 > ")
+		fmt.Print("\nタスクを入力 > ")
 
 		//４．入力を受け取る&お掃除
 		input, _ := reader.ReadString('\n')
@@ -39,7 +39,11 @@ func main() {
 			break
 		}
 
-		//７．新しいタスクを作る
+		if cleanTitle == "" {
+			continue
+		}
+
+		//７．新しいタスクを作る{}
 		newTask := Task{
 			Title: cleanTitle,
 			Completed: false,
@@ -50,7 +54,11 @@ func main() {
 		tasks = append(tasks, newTask)
 
 		//９．現在のリストを表示
-		fmt.Printf("現在のリスト: %+v\n", tasks)
+		fmt.Println("=== 現在のタスク ===")
+		for i, t := range tasks {
+			fmt.Printf("%d: [ ] %s\n", i, t.Title)
+		}
+		fmt.Println("==================")
 	}
 }
 
