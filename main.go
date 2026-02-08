@@ -43,11 +43,15 @@ func main() {
 			continue
 		}
 
-		//７．新しいタスクを作る{}
+		//６．期限を聞く
+		fmt.Print("期限を入力 > ")
+		dateInput, _ := reader.ReadString('\n')
+		cleanDeadline := strings.TrimSpace(dateInput)
+
+		//７．Deadlineにデータを入力
 		newTask := Task{
 			Title: cleanTitle,
-			Completed: false,
-			Deadline: "",
+			Completed: false, Deadline: cleanDeadline,
 		}
 
 		//８．リストに追加
@@ -56,7 +60,7 @@ func main() {
 		//９．現在のリストを表示
 		fmt.Println("=== 現在のタスク ===")
 		for i, t := range tasks {
-			fmt.Printf("%d: [ ] %s\n", i, t.Title)
+			fmt.Printf("%d: [ ] %s (期限: %s)\n", i, t.Title, t.Deadline)
 		}
 		fmt.Println("==================")
 	}
