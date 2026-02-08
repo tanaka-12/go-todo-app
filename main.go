@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"os"
 	"strings"
+	"strconv"
 )
 
 type Task struct {
@@ -43,6 +44,39 @@ func main() {
 			continue
 		}
 
+		//入力された文字をスペースで分割する
+		parts := strings.Split(cleanTitle, " ")
+
+		//「最初の単語」がdoneかどうかチェック
+		if parts[0] == "done" {
+
+			//番号が入力されているかチェック
+			if len(parts) < 2 {
+				fmt.Println("エラー : 番号を入力してください（例： done 0）")
+				continue
+			}
+
+			//文字を数字に変換
+			index, err := strconv.Atoi(parts[1])
+			if err != nil {
+				fmt.Println("正しい数字を入力してください")
+				continue
+			}
+
+			//タスクの番号が存在するかチェック
+			if index < 0 || index >= len(tasks) {
+				fmt.Println("エラー：その番号のタスクはありません")
+				continue
+			}
+
+			//ここに完了処理を書く
+			tasks[index].Completed = true
+			fmt.Println("🎉タスクを完了にしました！")
+
+			//ここでcontinueすると期限入力をスキップして、次のループに戻る
+			continue
+		}
+
 		//６．期限を聞く
 		fmt.Print("期限を入力 > ")
 		dateInput, _ := reader.ReadString('\n')
@@ -60,7 +94,14 @@ func main() {
 		//９．現在のリストを表示
 		fmt.Println("=== 現在のタスク ===")
 		for i, t := range tasks {
-			fmt.Printf("%d: [ ] %s (期限: %s)\n", i, t.Title, t.Deadline)
+			//ここでマークを決める
+			mark := "[]"
+			if t.Completed == true {
+				mark = "[x]"
+			}
+
+            //[]の代わりにmark変数を使う
+			fmt.Printf("%d: %s %s (期限: %s)\n", i, mark, t.Title, t.Deadline)
 		}
 		fmt.Println("==================")
 	}
