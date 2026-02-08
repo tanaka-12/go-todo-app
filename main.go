@@ -14,32 +14,44 @@ type Task struct {
 }
 
 func main() {
+	//１．箱（スライス）を作る
+	//ここはループの外
 	//タスクを保存するリスト
 	tasks := []Task{}
 
-	fmt.Println("タスクを入力してください: ")
-
-	//入力の準備
+	//２．読み込み準備
+	//ここもループの外で1回やればおっけー
 	reader := bufio.NewReader(os.Stdin)
 
-	//入力待ち（エンターキーが押されるまで）
-	input, _ := reader.ReadString('\n')
+	fmt.Println("TODOアプリを開始します（exitと入力すると終了） ")
 
-	//お掃除
-	cleanTitle := strings.TrimSpace(input)
+	//３．無限ループ開始
+	for{
+		fmt.Print("タスクを入力 > ")
 
-	//タスクの作成
-	newTask := Task{
-		Title: cleanTitle,
-		Completed: false,
-		Deadline: "",
+		//４．入力を受け取る&お掃除
+		input, _ := reader.ReadString('\n')
+		cleanTitle := strings.TrimSpace(input)
+
+		//５．脱出チェック
+		if cleanTitle == "exit" {
+			fmt.Println("アプリを終了します・・・")
+			break
+		}
+
+		//７．新しいタスクを作る
+		newTask := Task{
+			Title: cleanTitle,
+			Completed: false,
+			Deadline: "",
+		}
+
+		//８．リストに追加
+		tasks = append(tasks, newTask)
+
+		//９．現在のリストを表示
+		fmt.Printf("現在のリスト: %+v\n", tasks)
 	}
-
-	//リストの追加
-	tasks = append(tasks, newTask)
-
-	//結果発表
-	fmt.Printf("現在のリスト: %+v\n", tasks)
 }
 
 
