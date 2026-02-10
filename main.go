@@ -77,6 +77,51 @@ func main() {
 			continue
 		}
 
+		if parts[0] == "delete" {
+
+			//番号があるかチェック
+			if len(parts) < 2 {
+				fmt.Println("エラー : 削除する番号を入れてください（例： delete 0）")
+				continue
+			}
+
+			//文字を数字に変換
+			index, err := strconv.Atoi(parts[1])
+			if err != nil {
+				fmt.Println("エラー：正しい数字を入力してください")
+				continue
+			}
+
+			//タスクの番号が存在するかチェック
+			if index < 0 || index >= len(tasks) {
+				fmt.Println("エラー：その番号のタスクはありません")
+				continue
+			}
+
+			//削除実行
+			tasks = append(tasks[:index], tasks[index+1:]...)
+			fmt.Println("🗑️ タスクを削除しました！")
+			continue
+		}
+
+		//listを追加
+		if parts[0] == "list" {
+			fmt.Println("=== 現在のタスク ===")
+
+			//９からコピーしてくる
+			for i, t := range tasks {
+			//ここでマークを決める
+			mark := "[]"
+			if t.Completed == true {
+				mark = "[x]"
+			}
+			fmt.Printf("%d: %s %s (期限: %s)\n", i, mark, t.Title, t.Deadline)
+		}
+		fmt.Println("==================")
+
+		continue
+	}
+
 		//６．期限を聞く
 		fmt.Print("期限を入力 > ")
 		dateInput, _ := reader.ReadString('\n')
