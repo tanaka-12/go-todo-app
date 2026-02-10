@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"strconv"
+	"encoding/json"
 )
 
 type Task struct {
@@ -102,6 +103,29 @@ func main() {
 			tasks = append(tasks[:index], tasks[index+1:]...)
 			fmt.Println("🗑️ タスクを削除しました！")
 			continue
+		}
+
+		//saveコマンド
+		if parts[0] == "save" {
+			//Goのデータ(tasks)をJSON(bytes)に変換
+			bytes, err := json.Marshal(tasks)
+			if err != nil {
+				fmt.Println("変換に失敗しました...", err)
+				continue
+			}
+
+		//成功したらファイルに書き込む
+		//"tasks.json"はファイル名
+		//bytesは書き込みデータ
+		//0644は自分は読み書きおっけー、他人は見るだけ
+		err = os.WriteFile("tasks.json", bytes, 0644)
+		
+		if err != nil {
+			fmt.Println("保存に失敗しました...", err)
+		} else {
+			fmt.Println("💾 タスクを 'tasks.json' に保存しました！")
+		}
+		continue
 		}
 
 		//listを追加
