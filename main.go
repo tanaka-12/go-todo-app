@@ -51,7 +51,9 @@ func main() {
 			break
 		}
 
+		//バリデーションエラー
 		if cleanTitle == "" {
+			fmt.Println("⚠️エラー：タスク名が空です！文字を入力してください！")
 			continue
 		}
 
@@ -194,9 +196,29 @@ func main() {
 		}
 
 		//６．期限を聞く
-		fmt.Print("期限を入力 > ")
+		fmt.Print("期限を入力（例：2026-01-01) > ")
 		dateInput, _ := reader.ReadString('\n')
 		cleanDeadline := strings.TrimSpace(dateInput)
+
+		//日付のチェック機能
+		//形チェック：「2026-01-01」の形になっているか
+		deadlineTime, err := time.Parse("2006-01-02", cleanDeadline)
+
+		if err != nil {
+			//解析に失敗したらエラー（変な文字や存在しない数字）
+			fmt.Println("⚠️　エラー：日付は'2026-01-01'の形で入力してください！")
+			continue
+		}
+
+		//過去チェック
+		//time.Now()で今の時間を取る
+		//truncate(24*time.Hour)は「今日の0時0分」に合わせるおまじない
+		now := time.Now().Truncate(24 * time.Hour)
+
+		if deadlineTime.Before(now) {
+			fmt.Println("⚠️　エラー：過去の日付は入力できません！未来に向かって生きよう！")
+			continue
+		}
 
 		//７．Deadlineにデータを入力
 		newTask := Task{
