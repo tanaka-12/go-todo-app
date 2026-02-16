@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
-	"os"
-	"strings"
-	"strconv"
 	"encoding/json"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type Task struct {
@@ -37,7 +38,7 @@ func main() {
 	fmt.Println("TODOアプリを開始します（exitと入力すると終了） ")
 
 	//３．無限ループ開始
-	for{
+	for {
 		fmt.Print("\nタスクを入力 > ")
 
 		//４．入力を受け取る&お掃除
@@ -123,37 +124,52 @@ func main() {
 				continue
 			}
 
-		//成功したらファイルに書き込む
-		//"tasks.json"はファイル名
-		//bytesは書き込みデータ
-		//0644は自分は読み書きおっけー、他人は見るだけ
-		err = os.WriteFile("tasks.json", bytes, 0644)
-		
-		if err != nil {
-			fmt.Println("保存に失敗しました...", err)
-		} else {
-			fmt.Println("💾 タスクを 'tasks.json' に保存しました！")
-		}
-		continue
+			//成功したらファイルに書き込む
+			//"tasks.json"はファイル名
+			//bytesは書き込みデータ
+			//0644は自分は読み書きおっけー、他人は見るだけ
+			err = os.WriteFile("tasks.json", bytes, 0644)
+
+			if err != nil {
+				fmt.Println("保存に失敗しました...", err)
+			} else {
+				fmt.Println("💾 タスクを 'tasks.json' に保存しました！")
+			}
+			continue
 		}
 
 		//listを追加
 		if parts[0] == "list" {
 			fmt.Println("=== 現在のタスク ===")
 
+			//現在の時間を取得(ループ外で1回だけやること)
+			now := time.Now()
+
 			//９からコピーしてくる
 			for i, t := range tasks {
-			//ここでマークを決める
-			mark := "[]"
-			if t.Completed == true {
-				mark = "[x]"
-			}
-			fmt.Printf("%d: %s %s (期限: %s)\n", i, mark, t.Title, t.Deadline)
-		}
-		fmt.Println("==================")
+				//ここでマークを決める
+				mark := "[]"
+				if t.Completed == true {
+					mark = "[x]"
+				}
 
-		continue
-	}
+				//期限切れチェック！
+				//t.Deadline(文字)を時間データに変換してみる
+				deadlineTime, err := time.Parse("2006-01-02", t.Deadline)
+
+				//変換が成功(err == nil)して、かつ
+				//期限が過ぎていて(Before)、まだ完了していなければ(!t.Completed)
+				if err == nil && deadlineTime.Before(now) && !t.Completed {
+					//赤文字っぽく目立たせる(⚠️マーク)
+					fmt.Printf("%d: %s %s (期限: %s) ⚠️ 期限切れ！\n", i, mark, t.Title, t.Deadline)
+				} else {
+					//通常表示
+					fmt.Printf("%d: %s %s (期限: %s)\n", i, mark, t.Title, t.Deadline)
+				}
+			}
+			fmt.Println("==================")
+			continue
+		}
 
 		//６．期限を聞く
 		fmt.Print("期限を入力 > ")
@@ -162,7 +178,7 @@ func main() {
 
 		//７．Deadlineにデータを入力
 		newTask := Task{
-			Title: cleanTitle,
+			Title:     cleanTitle,
 			Completed: false, Deadline: cleanDeadline,
 		}
 
@@ -178,16 +194,9 @@ func main() {
 				mark = "[x]"
 			}
 
-            //[]の代わりにmark変数を使う
+			//[]の代わりにmark変数を使う
 			fmt.Printf("%d: %s %s (期限: %s)\n", i, mark, t.Title, t.Deadline)
 		}
 		fmt.Println("==================")
 	}
 }
-
-
-
-
-
-
-	
