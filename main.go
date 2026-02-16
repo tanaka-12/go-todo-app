@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -14,6 +15,7 @@ type Task struct {
 	Title     string
 	Completed bool
 	Deadline  string
+	Priority  int
 }
 
 func main() {
@@ -164,6 +166,12 @@ func main() {
 
 		//listを追加
 		if parts[0] == "list" {
+			//表示する前に「優先度が高い順」に並び替える
+			sort.Slice(tasks, func(i, j int) bool {
+				//i番目とj番目を比較してiのほうが大きければ「iを前にして」という意味
+				return tasks[i].Priority > tasks[j].Priority
+			})
+
 			fmt.Println("=== 現在のタスク ===")
 
 			//現在の時間を取得(ループ外で1回だけやること)
@@ -176,20 +184,24 @@ func main() {
 				if t.Completed == true {
 					mark = "[x]"
 				}
-
-				//期限切れチェック！
-				//t.Deadline(文字)を時間データに変換してみる
-				deadlineTime, err := time.Parse("2006-01-02", t.Deadline)
-
-				//変換が成功(err == nil)して、かつ
-				//期限が過ぎていて(Before)、まだ完了していなければ(!t.Completed)
-				if err == nil && deadlineTime.Before(now) && !t.Completed {
-					//赤文字っぽく目立たせる(⚠️マーク)
-					fmt.Printf("%d: %s %s (期限: %s) ⚠️ 期限切れ！\n", i, mark, t.Title, t.Deadline)
-				} else {
-					//通常表示
-					fmt.Printf("%d: %s %s (期限: %s)\n", i, mark, t.Title, t.Deadline)
+				//優先度表示
+				stars := "⭐" //低
+				if t.Priority == 2 {
+					stars = "⭐⭐" //中
+				} else if t.Priority == 3 {
+					stars = "⭐⭐⭐" //高
 				}
+
+				//期限切れチェック
+				deadlineTime, err := time.Parse("2006-01-02", t.Deadline)
+				expiredTag := ""
+				if err == nil && deadlineTime.Before(now) && !t.Completed {
+					expiredTag = "⚠️　期限切れ！"
+				}
+
+				fmt.Printf("%d: %s %-15s %-10s (期限: %s)%s\n",
+					i, mark, t.Title, "【"+stars+"】", t.Deadline, expiredTag)
+
 			}
 			fmt.Println("==================")
 			continue
@@ -220,10 +232,26 @@ func main() {
 			continue
 		}
 
+		//優先度を聞く
+		fmt.Print("優先度を入力（3:高, 2:中, 1:低）> ")
+		priorityInput, _ := reader.ReadString('\n')
+		cleanPriority := strings.TrimSpace(priorityInput)
+
+		//文字を数字に変換(Atoi)
+		priority, err := strconv.Atoi(cleanPriority)
+
+		//エラーチェック(数字じゃない、もしくは1～3以外)
+		if err != nil || priority < 1 || priority > 3 {
+			fmt.Println("⚠️　エラー：優先度は1,2,3の数字で入力してください！")
+			continue
+		}
+
 		//７．Deadlineにデータを入力
 		newTask := Task{
 			Title:     cleanTitle,
-			Completed: false, Deadline: cleanDeadline,
+			Completed: false,
+			Deadline:  cleanDeadline,
+			Priority:  priority,
 		}
 
 		//８．リストに追加
